@@ -4,7 +4,7 @@ Aplicação mobile para cadastrar disponibilidades e cruzar horários entre hunt
 
 ## Links
 
-- Repositório GitHub: será preenchido após a publicação.
+- Repositório GitHub: https://github.com/projepjr/agenda-em-comum
 - Produção Cloudflare: será preenchido após a publicação.
 - Supabase: projeto `gestaoprojep.com`, tabelas `agenda_users`, `agenda_availability` e `agenda_meetings`.
 
