@@ -13,6 +13,7 @@ async function setup() {
     CREATE TABLE IF NOT EXISTS users (id TEXT PRIMARY KEY, name TEXT NOT NULL, email TEXT NOT NULL UNIQUE, role TEXT NOT NULL, initials TEXT NOT NULL, tone TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS availability (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id TEXT NOT NULL, date TEXT NOT NULL, start_minute INTEGER NOT NULL, end_minute INTEGER NOT NULL);
     CREATE TABLE IF NOT EXISTS meetings (id INTEGER PRIMARY KEY AUTOINCREMENT, organizer_id TEXT NOT NULL, participant_id TEXT NOT NULL, date TEXT NOT NULL, start_minute INTEGER NOT NULL, duration INTEGER NOT NULL);
+    DELETE FROM availability WHERE id NOT IN (SELECT MIN(id) FROM availability GROUP BY user_id,date,start_minute,end_minute);
     CREATE UNIQUE INDEX IF NOT EXISTS availability_unique ON availability(user_id,date,start_minute,end_minute);
   `);
   const insert = env.DB.prepare('INSERT OR IGNORE INTO users (id,name,email,role,initials,tone) VALUES (?,?,?,?,?,?)');
