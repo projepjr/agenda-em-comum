@@ -94,4 +94,37 @@ input:focus { border-color:var(--green); box-shadow:0 0 0 3px rgb(31 102 79 / 10
 .modal-backdrop { position:absolute; inset:0; z-index:10; display:flex; align-items:flex-end; background:rgb(9 22 17 / 50%); backdrop-filter:blur(3px); }
 .sheet { width:100%; display:grid; gap:14px; border-radius:28px 28px 0 0; background:var(--paper); padding:12px 20px max(24px,env(safe-area-inset-bottom)); box-shadow:0 -20px 60px rgb(0 0 0 / 22%); }
 .sheet-handle { width:42px; height:4px; border-radius:99px; background:#ced3ce; margin:0 auto 3px; }.sheet-title{display:flex;justify-content:space-between;align-items:start}.sheet-title h2{margin:0;font-size:22px}.sheet-title>button{width:34px;height:34px;border:0;border-radius:11px;background:#e9ece7;font-size:22px}.time-row{display:grid;grid-template-columns:1fr 20px 1fr;align-items:end;gap:7px}.time-row>span{padding-bottom:17px;color:var(--muted);text-align:center}.limit-note{margin:0;color:var(--muted);font-size:10px}
+.day-column.clickable { cursor:pointer; transition:transform .15s,border-color .15s; }
+.day-column.clickable:active { transform:scale(.98); border-color:var(--green); }
+.day-trigger { display:block; width:100%; border:0; background:transparent; padding:0; }
+.day-trigger>span { color:var(--muted); font-size:9px; font-weight:800; }
+.day-trigger>strong { display:grid; place-items:center; width:30px; height:30px; margin:5px auto 15px; border-radius:10px; font-size:13px; }
+.find-screen { padding-top:10px; }
+.people-picker { position:relative; border:1px solid var(--line); border-radius:17px; background:#fff; }
+.people-picker.open { border-color:var(--green); box-shadow:0 8px 24px rgb(19 39 33 / 8%); }
+.people-summary { display:flex; align-items:center; justify-content:space-between; width:100%; min-height:52px; border:0; background:transparent; padding:0 15px; font-size:13px; font-weight:800; text-align:left; }
+.people-summary i { color:var(--green); font-size:18px; font-style:normal; }
+.selected-chips { display:flex; gap:6px; overflow-x:auto; padding:0 12px 11px; }
+.selected-chips button { flex:none; border:0; border-radius:99px; background:#e8f1ed; padding:7px 10px; color:var(--green); font-size:10px; font-weight:800; }
+.selected-chips span { margin-left:3px; }
+.people-panel { border-top:1px solid var(--line); padding:10px; }
+.search-field { position:relative; display:flex; align-items:center; gap:6px; border:1px solid var(--line); border-radius:12px; padding-left:12px; color:var(--muted); }
+.search-field input { min-height:43px; border:0; padding-left:2px; box-shadow:none; }
+.people-options { display:grid; gap:5px; max-height:205px; overflow:auto; margin-top:9px; }
+.people-options button { display:grid; grid-template-columns:35px 1fr 20px; align-items:center; gap:9px; border:0; border-radius:12px; background:transparent; padding:7px; text-align:left; }
+.people-options button.selected { background:#eef4f0; }
+.people-options strong,.people-options small { display:block; }
+.people-options strong { font-size:12px; }
+.people-options small { margin-top:2px; color:var(--muted); font-size:10px; }
+.people-options i { color:var(--green); font-style:normal; font-weight:900; }
+.done-button { width:100%; min-height:42px; margin-top:9px; border:0; border-radius:12px; background:var(--ink); color:#fff; font-size:11px; font-weight:800; }
+.common-week { margin-top:4px; }
+.common-week .day-column { min-height:250px; padding:10px 5px; }
+.common-slot-stack { display:grid; gap:6px; }
+.common-slot-stack>button { display:grid; place-items:center; width:100%; border:0; border-radius:9px; background:#e8f1ed; padding:7px 2px; color:var(--green); }
+.common-slot-stack b { font-size:9px; }
+.common-slot-stack small { font-size:7px; opacity:.7; }
+.common-slot-stack em { display:block; max-width:50px; overflow:hidden; text-overflow:ellipsis; color:#53645c; font-size:7px; font-style:normal; white-space:nowrap; }
+.common-slot-stack>i { color:#a5afa9; font-style:normal; padding-top:12px; }
+.empty.compact { margin-top:10px; padding:16px; }
 @media (min-width:600px) { .app-shell{padding:28px}.phone-surface{min-height:min(860px,calc(100dvh - 56px));max-width:430px;border-radius:34px;box-shadow:0 28px 80px rgb(19 39 33 / 16%)} }

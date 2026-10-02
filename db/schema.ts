@@ -1,4 +1,4 @@
-import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
+import { integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
 
 export const users = sqliteTable('users', {
   id: text('id').primaryKey(),
@@ -15,7 +15,7 @@ export const availability = sqliteTable('availability', {
   date: text('date').notNull(),
   startMinute: integer('start_minute').notNull(),
   endMinute: integer('end_minute').notNull(),
-});
+}, (table) => [uniqueIndex('availability_unique').on(table.userId, table.date, table.startMinute, table.endMinute)]);
 
 export const meetings = sqliteTable('meetings', {
   id: integer('id').primaryKey({ autoIncrement: true }),

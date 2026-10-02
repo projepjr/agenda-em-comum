@@ -13,6 +13,7 @@ async function setup() {
     CREATE TABLE IF NOT EXISTS users (id TEXT PRIMARY KEY, name TEXT NOT NULL, email TEXT NOT NULL UNIQUE, role TEXT NOT NULL, initials TEXT NOT NULL, tone TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS availability (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id TEXT NOT NULL, date TEXT NOT NULL, start_minute INTEGER NOT NULL, end_minute INTEGER NOT NULL);
     CREATE TABLE IF NOT EXISTS meetings (id INTEGER PRIMARY KEY AUTOINCREMENT, organizer_id TEXT NOT NULL, participant_id TEXT NOT NULL, date TEXT NOT NULL, start_minute INTEGER NOT NULL, duration INTEGER NOT NULL);
+    CREATE UNIQUE INDEX IF NOT EXISTS availability_unique ON availability(user_id,date,start_minute,end_minute);
   `);
   const insert = env.DB.prepare('INSERT OR IGNORE INTO users (id,name,email,role,initials,tone) VALUES (?,?,?,?,?,?)');
   await env.DB.batch(demoUsers.map((user) => insert.bind(...user)));
@@ -31,6 +32,33 @@ async function setup() {
 }
 
 function session(request: NextRequest) { return request.cookies.get('agenda_demo_user')?.value; }
+
+const pad = (value: number) => String(value).padStart(2, '0');
+const toIso = (date: Date) => `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+const addDays = (date: Date, amount: number) => { const next = new Date(date); next.setDate(next.getDate() + amount); return next; };
+const addMonths = (date: Date, amount: number) => { const next = new Date(date); next.setMonth(next.getMonth() + amount); return next; };
+
+function recurrenceDates(baseValue: string, recurrence: string) {
+  const base = new Date(`${baseValue}T12:00:00`);
+  if (Number.isNaN(base.getTime())) return [];
+  if (recurrence === 'daily') {
+    const limit = addMonths(base, 12), dates: string[] = [];
+    for (let cursor = new Date(base); cursor < limit; cursor = addDays(cursor, 1)) if (cursor.getDay() >= 1 && cursor.getDay() <= 5) dates.push(toIso(cursor));
+    return dates;
+  }
+  if (recurrence === 'weekly') return Array.from({ length: 52 }, (_, index) => toIso(addDays(base, index * 7)));
+  if (recurrence === 'monthly') {
+    const weekday = base.getDay(), ordinal = Math.floor((base.getDate() - 1) / 7);
+    return Array.from({ length: 12 }, (_, index) => {
+      const month = new Date(base.getFullYear(), base.getMonth() + index, 1, 12);
+      const offset = (weekday - month.getDay() + 7) % 7;
+      const candidate = new Date(month.getFullYear(), month.getMonth(), 1 + offset + ordinal * 7, 12);
+      if (candidate.getMonth() !== month.getMonth()) candidate.setDate(candidate.getDate() - 7);
+      return toIso(candidate);
+    });
+  }
+  return [toIso(base)];
+}
 
 export async function GET(request: NextRequest) {
   await setup();
@@ -59,11 +87,11 @@ export async function POST(request: NextRequest) {
   const userId = session(request);
   if (!userId) return NextResponse.json({ error: 'Sessão expirada.' }, { status: 401 });
   if (body.action === 'addAvailability') {
-    const dates = Array.isArray(body.dates) ? body.dates : [];
+    const dates = recurrenceDates(String(body.date), String(body.recurrence || 'once'));
     const start = Number(body.startMinute), end = Number(body.endMinute);
     if (!dates.length || start < 420 || end > 1080 || end <= start) return NextResponse.json({ error: 'Use um intervalo entre 07:00 e 18:00.' }, { status: 400 });
-    const insert = env.DB.prepare('INSERT INTO availability (user_id,date,start_minute,end_minute) VALUES (?,?,?,?)');
-    await env.DB.batch(dates.map((date) => insert.bind(userId, date, start, end)));
+    const insert = env.DB.prepare('INSERT OR IGNORE INTO availability (user_id,date,start_minute,end_minute) VALUES (?,?,?,?)');
+    for (let offset = 0; offset < dates.length; offset += 75) await env.DB.batch(dates.slice(offset, offset + 75).map((date) => insert.bind(userId, date, start, end)));
     return NextResponse.json({ ok: true });
   }
   if (body.action === 'deleteAvailability') {
@@ -71,8 +99,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: true });
   }
   if (body.action === 'book') {
-    const participantId = String(body.participantId), date = String(body.date), start = Number(body.startMinute), duration = Number(body.duration);
-    await env.DB.prepare('INSERT INTO meetings (organizer_id,participant_id,date,start_minute,duration) VALUES (?,?,?,?,?)').bind(userId, participantId, date, start, duration).run();
+    const participantIds = Array.isArray(body.participantIds) ? body.participantIds.map(String) : [];
+    const date = String(body.date), start = Number(body.startMinute), duration = Number(body.duration);
+    if (!participantIds.length) return NextResponse.json({ error: 'Selecione pelo menos uma pessoa.' }, { status: 400 });
+    const insert = env.DB.prepare('INSERT INTO meetings (organizer_id,participant_id,date,start_minute,duration) VALUES (?,?,?,?,?)');
+    await env.DB.batch(participantIds.map((participantId) => insert.bind(userId, participantId, date, start, duration)));
     return NextResponse.json({ ok: true });
   }
   return NextResponse.json({ error: 'Ação desconhecida.' }, { status: 400 });

@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX `availability_unique` ON `availability` (`user_id`,`date`,`start_minute`,`end_minute`);
