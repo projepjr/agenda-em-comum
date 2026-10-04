@@ -27,6 +27,15 @@ Aplicação mobile para cadastrar disponibilidades e cruzar horários entre hunt
 - As tabelas têm RLS habilitado.
 - Como esta é uma versão de demonstração sem autenticação real, as políticas permitem leitura e gravação anônimas somente nas tabelas prefixadas com `agenda_`.
 - Antes de uso real, substitua os logins demonstrativos por Supabase Auth e políticas ligadas a `auth.uid()`.
+- `agenda_meetings.title` guarda o nome da reunião e `agenda_meetings.meeting_group_id` agrupa as linhas de um agendamento com vários participantes.
+- A API suporta `updateAvailability`, `deleteAvailability`, `book` e `cancelMeeting`.
+
+## Fluxos da interface
+
+- O toque em uma disponibilidade abre a edição; a exclusão só existe dentro dessa janela.
+- A busca de pessoas permite múltipla seleção e filtros por Closer, Hunter e Gerente.
+- O agendamento solicita apenas o nome da reunião.
+- A aba Reuniões alterna entre semana/mês e Minhas/Todas; somente participantes podem desmarcar um encontro.
 
 ## Deploy
 

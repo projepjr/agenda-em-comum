@@ -9,7 +9,7 @@ const demoUsers = [
 ] as const;
 
 type AvailabilityRow = { id:number; user_id:string; date:string; start_minute:number; end_minute:number };
-type MeetingRow = { id:number; organizer_id:string; participant_id:string; date:string; start_minute:number; duration:number };
+type MeetingRow = { id:number; organizer_id:string; participant_id:string; date:string; start_minute:number; duration:number; title:string; meeting_group_id:string };
 
 async function supabase(path:string, init:RequestInit={}) {
   const response = await fetch(`${env.SUPABASE_URL}/rest/v1/${path}`, {
@@ -44,11 +44,11 @@ export async function GET(request:NextRequest) {
   const [usersResponse,availabilityResponse,meetingsResponse]=await Promise.all([
     supabase('agenda_users?select=*&order=name'),
     supabase('agenda_availability?select=id,user_id,date,start_minute,end_minute&order=date,start_minute'),
-    userId?supabase(`agenda_meetings?select=id,organizer_id,participant_id,date,start_minute,duration&or=(organizer_id.eq.${userId},participant_id.eq.${userId})&order=date,start_minute`):null,
+    userId?supabase('agenda_meetings?select=id,organizer_id,participant_id,date,start_minute,duration,title,meeting_group_id&order=date,start_minute'):null,
   ]);
   const users=await usersResponse.json();
   const availability=((await availabilityResponse.json()) as AvailabilityRow[]).map(row=>({id:row.id,userId:row.user_id,date:row.date,startMinute:row.start_minute,endMinute:row.end_minute}));
-  const meetings=meetingsResponse?((await meetingsResponse.json()) as MeetingRow[]).map(row=>({id:row.id,organizerId:row.organizer_id,participantId:row.participant_id,date:row.date,startMinute:row.start_minute,duration:row.duration})):[];
+  const meetings=meetingsResponse?((await meetingsResponse.json()) as MeetingRow[]).map(row=>({id:row.id,organizerId:row.organizer_id,participantId:row.participant_id,date:row.date,startMinute:row.start_minute,duration:row.duration,title:row.title,meetingGroupId:row.meeting_group_id})):[];
   return NextResponse.json({userId,users,availability,meetings});
 }
 
@@ -70,10 +70,22 @@ export async function POST(request:NextRequest) {
   if(body.action==='deleteAvailability'){
     await supabase(`agenda_availability?id=eq.${Number(body.id)}&user_id=eq.${userId}`,{method:'DELETE'});return NextResponse.json({ok:true});
   }
+  if(body.action==='updateAvailability'){
+    const id=Number(body.id),date=String(body.date),start=Number(body.startMinute),end=Number(body.endMinute);
+    if(!id||start<420||end>1080||end<=start)return NextResponse.json({error:'Use um intervalo entre 07:00 e 18:00.'},{status:400});
+    await supabase(`agenda_availability?id=eq.${id}&user_id=eq.${userId}`,{method:'PATCH',headers:{Prefer:'return=minimal'},body:JSON.stringify({date,start_minute:start,end_minute:end})});
+    return NextResponse.json({ok:true});
+  }
   if(body.action==='book'){
-    const participantIds=Array.isArray(body.participantIds)?body.participantIds.map(String):[],date=String(body.date),start=Number(body.startMinute),duration=Number(body.duration);
-    if(!participantIds.length)return NextResponse.json({error:'Selecione pelo menos uma pessoa.'},{status:400});
-    await supabase('agenda_meetings',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify(participantIds.map(participantId=>({organizer_id:userId,participant_id:participantId,date,start_minute:start,duration})))});
+    const participantIds=Array.isArray(body.participantIds)?body.participantIds.map(String):[],date=String(body.date),start=Number(body.startMinute),duration=Number(body.duration),title=String(body.title||'').trim().slice(0,80),meetingGroupId=crypto.randomUUID();
+    if(!participantIds.length||!title)return NextResponse.json({error:'Informe o nome da reunião.'},{status:400});
+    await supabase('agenda_meetings',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify(participantIds.map(participantId=>({organizer_id:userId,participant_id:participantId,date,start_minute:start,duration,title,meeting_group_id:meetingGroupId})))});
+    return NextResponse.json({ok:true});
+  }
+  if(body.action==='cancelMeeting'){
+    const groupId=String(body.meetingGroupId||'');
+    if(!groupId)return NextResponse.json({error:'Reunião inválida.'},{status:400});
+    await supabase(`agenda_meetings?meeting_group_id=eq.${groupId}&or=(organizer_id.eq.${userId},participant_id.eq.${userId})`,{method:'DELETE'});
     return NextResponse.json({ok:true});
   }
   return NextResponse.json({error:'Ação desconhecida.'},{status:400});
