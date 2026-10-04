@@ -119,5 +119,10 @@ input:focus,select:focus { border-color:var(--green); box-shadow:0 0 0 3px rgb(2
 @media (min-width:600px) {
   .app-shell { padding:12px; }
   .phone-surface { width:min(100%,540px); min-height:calc(100dvh - 24px); max-height:calc(100dvh - 24px); overflow-y:auto; border-radius:38px; box-shadow:0 24px 70px rgb(16 42 34 / 14%); }
-  .bottom-nav { position:sticky; margin-top:36px; }
+}
+@media (max-height:740px) {
+  .dashboard-screen { padding-top:24px; }
+  .mobile-header { margin-bottom:18px; }
+  .day-column { min-height:225px; }
+  .primary-action { margin-top:16px; }
 }
