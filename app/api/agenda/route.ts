@@ -111,10 +111,10 @@ export async function POST(request:NextRequest) {
     return NextResponse.json({ok:true});
   }
   if(body.action==='updateMeeting'){
-    const groupId=String(body.meetingGroupId||''),title=String(body.title||'').trim().slice(0,80),meetingType=String(body.meetingType),status=String(body.status),date=String(body.date),start=Number(body.startMinute),duration=Number(body.duration);
-    if(!groupId||!title||!['AP','DIAG'].includes(meetingType)||!['scheduled','happened','no_show','rescheduling','interest_future','discarded'].includes(status)||!date||start<420||start+duration>1080||duration<15)return NextResponse.json({error:'Revise os dados da reunião.'},{status:400});
+    const groupId=String(body.meetingGroupId||''),title=String(body.title||'').trim().slice(0,80),meetingType=String(body.meetingType),status=String(body.status);
+    if(!groupId||!title||!['AP','DIAG'].includes(meetingType)||!['scheduled','happened','no_show','rescheduling','interest_future','discarded'].includes(status))return NextResponse.json({error:'Revise os dados da reunião.'},{status:400});
     if(!await canManageMeeting(groupId,userId))return NextResponse.json({error:'Você não pode editar esta reunião.'},{status:403});
-    await supabase(`agenda_meetings?meeting_group_id=eq.${encodeURIComponent(groupId)}`,{method:'PATCH',headers:{Prefer:'return=minimal'},body:JSON.stringify({title,meeting_type:meetingType,status,date,start_minute:start,duration})});
+    await supabase(`agenda_meetings?meeting_group_id=eq.${encodeURIComponent(groupId)}`,{method:'PATCH',headers:{Prefer:'return=minimal'},body:JSON.stringify({title,meeting_type:meetingType,status})});
     return NextResponse.json({ok:true});
   }
   if(body.action==='cancelMeeting'){

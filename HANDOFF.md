@@ -37,9 +37,13 @@ Aplicação mobile para cadastrar disponibilidades e cruzar horários entre hunt
 - A busca de pessoas permite múltipla seleção e filtros por Closer, Hunter e Gerente.
 - O agendamento solicita apenas o nome da reunião.
 - A aba Reuniões alterna entre semana/mês e Minhas/Todas; somente participantes podem desmarcar um encontro.
+- A edição de reunião permite alterar apenas nome, tipo e status. Data, horário, duração e participantes são somente leitura, e a API também ignora tentativas de alterar a agenda por essa rota.
+- A exclusão de reunião exige confirmação. Ao remover o grupo, as disponibilidades originais continuam salvas e o intervalo volta a aparecer para os dois participantes.
 - A visualização semanal usa cinco colunas; a mensal empilha as semanas do mês no mesmo formato.
 - Tocar no card abre a edição. Os três pontos alteram o status e a cor do card; a lixeira fica apenas nessa janela.
 - A agenda principal ocupa a altura livre acima do CTA e da navegacao inferior; o CTA de disponibilidade e compacto.
+- A navegacao inferior usa posicionamento fixo e continua acessivel durante a rolagem das visoes semanais e mensais.
+- Erros de criacao ou edicao de disponibilidade aparecem dentro da propria janela aberta.
 - A busca de participantes sempre inicia vazia e o seletor usa controles compactos com espacamento proprio.
 - Os icones de exclusao sao SVG pretos; nao reintroduzir emoji de lixeira.
 - O cruzamento de disponibilidade remove slots ocupados tanto pelo usuario atual quanto por qualquer pessoa selecionada.

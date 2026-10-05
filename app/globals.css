@@ -93,7 +93,7 @@ button { cursor:pointer; }
 .cancel-meeting,.delete-button { display:grid; place-items:center; flex:0 0 auto; width:36px; height:36px; border:1px solid var(--line); border-radius:10px; background:#fff; color:#111; }
 .delete-button svg { width:15px; height:15px; fill:none; stroke:currentColor; stroke-width:1.65; stroke-linecap:round; stroke-linejoin:round; }
 .empty { display:grid; place-items:center; min-height:180px; border:1px dashed #ccd5d0; border-radius:18px; color:var(--muted); font-size:13px; }
-.bottom-nav { position:absolute; z-index:5; right:15px; bottom:max(14px,env(safe-area-inset-bottom)); left:15px; display:grid; grid-template-columns:repeat(3,1fr); gap:6px; padding:8px; border:1px solid var(--line); border-radius:22px; background:rgba(255,255,255,.94); box-shadow:0 10px 32px rgb(16 42 34 / 10%); backdrop-filter:blur(14px); }
+.bottom-nav { position:fixed; z-index:5; bottom:max(14px,env(safe-area-inset-bottom)); left:50%; display:grid; grid-template-columns:repeat(3,1fr); gap:6px; width:min(calc(100% - 30px),510px); padding:8px; border:1px solid var(--line); border-radius:22px; background:rgba(255,255,255,.94); box-shadow:0 10px 32px rgb(16 42 34 / 10%); backdrop-filter:blur(14px); transform:translateX(-50%); }
 .bottom-nav button { display:grid; gap:4px; place-items:center; min-height:58px; border:0; border-radius:16px; background:transparent; color:var(--muted); font-size:10px; font-weight:760; }
 .bottom-nav button span { font-size:18px; }
 .bottom-nav button.active { background:var(--mint); color:var(--green); }
@@ -134,10 +134,22 @@ button { cursor:pointer; }
 .status-menu button.status-discarded { background:#ef3f4d; color:#fff; }
 .status-menu i,.current-status i { width:7px; height:7px; border-radius:50%; background:currentColor; }
 .current-status { display:flex; align-items:center; gap:7px; width:max-content; padding:6px 9px; border-radius:99px; font-size:9px; font-weight:800; }
+.meeting-readonly { display:grid; gap:7px; }
+.meeting-readonly > div { display:grid; gap:3px; padding:10px 12px; border:1px solid var(--line); border-radius:12px; background:#f8faf8; }
+.meeting-readonly span { color:var(--muted); font-size:9px; font-weight:750; text-transform:uppercase; letter-spacing:.06em; }
+.meeting-readonly strong { font-size:11px; font-weight:720; }
 input,select { width:100%; min-height:50px; padding:0 14px; border:1px solid var(--line); border-radius:14px; background:#fff; outline:none; }
 input:focus,select:focus { border-color:var(--green); box-shadow:0 0 0 3px rgb(23 99 77 / 10%); }
 .form-error { margin:0; color:var(--danger); font-size:12px; }
+.modal-error { padding:9px 11px; border:1px solid #f2c8c3; border-radius:11px; background:#fff3f1; }
 .page-error { margin:-14px 0 16px; }
+.confirmation-backdrop { z-index:22; }
+.confirmation-sheet { gap:10px; padding-top:16px; }
+.confirmation-sheet h2 { margin:0; font-size:20px; }
+.confirmation-sheet p { margin:0; color:var(--muted); font-size:12px; line-height:1.45; }
+.confirmation-actions { display:flex; justify-content:flex-end; gap:7px; margin-top:5px; }
+.confirmation-actions button { min-height:35px; padding:0 14px; border:1px solid var(--line); border-radius:10px; background:#fff; font-size:11px; font-weight:800; }
+.confirmation-actions .danger-action { border-color:#e5484d; background:#e5484d; color:#fff; }
 .toast { display:flex; align-items:center; justify-content:space-between; width:100%; margin:-12px 0 16px; padding:11px 14px; border:0; border-radius:12px; background:var(--mint); color:var(--green); font-size:12px; font-weight:750; }
 .toast span { font-size:18px; }
 .login-screen { padding:max(48px,env(safe-area-inset-top)) 24px 34px; }
