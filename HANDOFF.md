@@ -42,6 +42,9 @@ Aplicação mobile para cadastrar disponibilidades e cruzar horários entre hunt
 - A agenda principal ocupa a altura livre acima do CTA e da navegacao inferior; o CTA de disponibilidade e compacto.
 - A busca de participantes sempre inicia vazia e o seletor usa controles compactos com espacamento proprio.
 - Os icones de exclusao sao SVG pretos; nao reintroduzir emoji de lixeira.
+- O cruzamento de disponibilidade remove slots ocupados tanto pelo usuario atual quanto por qualquer pessoa selecionada.
+- A criacao usa o RPC transacional `agenda_book_meeting`; nao substituir por insert direto, pois os locks por pessoa evitam agendamento simultaneo no mesmo intervalo.
+- Status disponiveis: `happened`, `no_show`, `interest_future`, `rescheduling` (rotulo Remarcando) e `discarded`.
 
 ## Deploy
 

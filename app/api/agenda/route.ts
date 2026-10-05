@@ -9,7 +9,7 @@ const demoUsers = [
 ] as const;
 
 type AvailabilityRow = { id:number; user_id:string; date:string; start_minute:number; end_minute:number };
-type MeetingRow = { id:number; organizer_id:string; participant_id:string; date:string; start_minute:number; duration:number; title:string; meeting_group_id:string; meeting_type:'AP'|'DIAG'; status:'scheduled'|'happened'|'no_show'|'rescheduling' };
+type MeetingRow = { id:number; organizer_id:string; participant_id:string; date:string; start_minute:number; duration:number; title:string; meeting_group_id:string; meeting_type:'AP'|'DIAG'; status:'scheduled'|'happened'|'no_show'|'rescheduling'|'interest_future'|'discarded' };
 
 async function supabase(path:string, init:RequestInit={}) {
   const response = await fetch(`${env.SUPABASE_URL}/rest/v1/${path}`, {
@@ -84,12 +84,17 @@ export async function POST(request:NextRequest) {
   if(body.action==='book'){
     const participantIds=Array.isArray(body.participantIds)?body.participantIds.map(String):[],date=String(body.date),start=Number(body.startMinute),duration=Number(body.duration),title=String(body.title||'').trim().slice(0,80),meetingType=String(body.meetingType),meetingGroupId=crypto.randomUUID();
     if(!participantIds.length||!title||!['AP','DIAG'].includes(meetingType))return NextResponse.json({error:'Informe o nome e o tipo da reunião.'},{status:400});
-    await supabase('agenda_meetings',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify(participantIds.map(participantId=>({organizer_id:userId,participant_id:participantId,date,start_minute:start,duration,title,meeting_type:meetingType,status:'scheduled',meeting_group_id:meetingGroupId})))});
+    try{
+      await supabase('rpc/agenda_book_meeting',{method:'POST',body:JSON.stringify({p_organizer_id:userId,p_participant_ids:participantIds,p_date:date,p_start_minute:start,p_duration:duration,p_title:title,p_meeting_type:meetingType,p_group_id:meetingGroupId})});
+    }catch(error){
+      if((error as Error).message.includes('Horário indisponível'))return NextResponse.json({error:'Esse horário acabou de ser ocupado. Escolha outro.'},{status:409});
+      throw error;
+    }
     return NextResponse.json({ok:true});
   }
   if(body.action==='updateMeeting'){
     const groupId=String(body.meetingGroupId||''),title=String(body.title||'').trim().slice(0,80),meetingType=String(body.meetingType),status=String(body.status),date=String(body.date),start=Number(body.startMinute),duration=Number(body.duration);
-    if(!groupId||!title||!['AP','DIAG'].includes(meetingType)||!['scheduled','happened','no_show','rescheduling'].includes(status)||!date||start<420||start+duration>1080||duration<15)return NextResponse.json({error:'Revise os dados da reunião.'},{status:400});
+    if(!groupId||!title||!['AP','DIAG'].includes(meetingType)||!['scheduled','happened','no_show','rescheduling','interest_future','discarded'].includes(status)||!date||start<420||start+duration>1080||duration<15)return NextResponse.json({error:'Revise os dados da reunião.'},{status:400});
     if(!await canManageMeeting(groupId,userId))return NextResponse.json({error:'Você não pode editar esta reunião.'},{status:403});
     await supabase(`agenda_meetings?meeting_group_id=eq.${encodeURIComponent(groupId)}`,{method:'PATCH',headers:{Prefer:'return=minimal'},body:JSON.stringify({title,meeting_type:meetingType,status,date,start_minute:start,duration})});
     return NextResponse.json({ok:true});

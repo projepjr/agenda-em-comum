@@ -86,8 +86,10 @@ button { cursor:pointer; }
 .meeting-card strong { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:8px; }
 .meeting-card small { overflow:hidden; color:#607169; text-overflow:ellipsis; white-space:nowrap; font-size:7px; }
 .status-happened { background:#dff3e6; color:#1f6b40; }
-.status-no_show { background:#7d2823; color:#fff; }
+.status-no_show { background:#eee5ff; color:#6d28d9; }
+.status-interest_future { background:#ffe889; color:#6b5100; }
 .status-rescheduling { background:#f39a32; color:#4f2800; }
+.status-discarded { background:#ef3f4d; color:#fff; }
 .cancel-meeting,.delete-button { display:grid; place-items:center; flex:0 0 auto; width:36px; height:36px; border:1px solid var(--line); border-radius:10px; background:#fff; color:#111; }
 .delete-button svg { width:15px; height:15px; fill:none; stroke:currentColor; stroke-width:1.65; stroke-linecap:round; stroke-linejoin:round; }
 .empty { display:grid; place-items:center; min-height:180px; border:1px dashed #ccd5d0; border-radius:18px; color:var(--muted); font-size:13px; }
@@ -116,7 +118,7 @@ button { cursor:pointer; }
 .meeting-type-label { display:inline-block; margin-bottom:5px; background:var(--mint); color:var(--green); font-size:8px; }
 .meeting-menu { position:relative; display:flex; align-items:center; gap:6px; }
 .more-button { width:38px!important; border:1px solid var(--line)!important; background:#fff!important; font-size:13px!important; letter-spacing:1px; }
-.status-menu { position:absolute; z-index:3; top:43px; right:0; display:grid; gap:3px; width:145px; padding:6px; border:1px solid var(--line); border-radius:13px; background:#fff; box-shadow:0 12px 35px rgb(16 42 34 / 15%); }
+.status-menu { position:absolute; z-index:3; top:43px; right:0; display:grid; gap:3px; width:156px; padding:6px; border:1px solid var(--line); border-radius:13px; background:#fff; box-shadow:0 12px 35px rgb(16 42 34 / 15%); }
 .status-menu button { display:flex; align-items:center; gap:8px; width:100%; min-height:34px; padding:0 9px; border:0; border-radius:9px; text-align:left; font-size:10px; font-weight:750; }
 .status-menu i,.current-status i { width:7px; height:7px; border-radius:50%; background:currentColor; }
 .current-status { display:flex; align-items:center; gap:7px; width:max-content; padding:6px 9px; border-radius:99px; font-size:9px; font-weight:800; }
