@@ -8,7 +8,7 @@ const demoUsers = [
   ['thiago', 'Thiago Brandão', 'thiago@demo.com', 'Hunter', 'TB', 'mint'],
 ] as const;
 
-type AvailabilityRow = { id:number; user_id:string; date:string; start_minute:number; end_minute:number };
+type AvailabilityRow = { id:number; user_id:string; date:string; start_minute:number; end_minute:number; recurrence_group_id:string|null; recurrence_type:'once'|'daily'|'weekly' };
 type MeetingRow = { id:number; organizer_id:string; participant_id:string; date:string; start_minute:number; duration:number; title:string; meeting_group_id:string; meeting_type:'AP'|'DIAG'; status:'scheduled'|'happened'|'no_show'|'rescheduling'|'interest_future'|'discarded' };
 
 async function supabase(path:string, init:RequestInit={}) {
@@ -40,7 +40,6 @@ function recurrenceDates(baseValue:string, recurrence:string) {
   const base=new Date(`${baseValue}T12:00:00`); if(Number.isNaN(base.getTime()))return [];
   if(recurrence==='daily'){const limit=addMonths(base,12),dates:string[]=[];for(let cursor=new Date(base);cursor<limit;cursor=addDays(cursor,1))if(cursor.getDay()>=1&&cursor.getDay()<=5)dates.push(toIso(cursor));return dates;}
   if(recurrence==='weekly')return Array.from({length:52},(_,index)=>toIso(addDays(base,index*7)));
-  if(recurrence==='monthly'){const weekday=base.getDay(),ordinal=Math.floor((base.getDate()-1)/7);return Array.from({length:12},(_,index)=>{const month=new Date(base.getFullYear(),base.getMonth()+index,1,12);const offset=(weekday-month.getDay()+7)%7;const candidate=new Date(month.getFullYear(),month.getMonth(),1+offset+ordinal*7,12);if(candidate.getMonth()!==month.getMonth())candidate.setDate(candidate.getDate()-7);return toIso(candidate);});}
   return [toIso(base)];
 }
 
@@ -48,11 +47,11 @@ export async function GET(request:NextRequest) {
   const userId=session(request);
   const [usersResponse,availabilityResponse,meetingsResponse]=await Promise.all([
     supabase('agenda_users?select=*&order=name'),
-    supabase('agenda_availability?select=id,user_id,date,start_minute,end_minute&order=date,start_minute'),
+    supabase('agenda_availability?select=id,user_id,date,start_minute,end_minute,recurrence_group_id,recurrence_type&order=date,start_minute'),
     userId?supabase('agenda_meetings?select=id,organizer_id,participant_id,date,start_minute,duration,title,meeting_group_id,meeting_type,status&order=date,start_minute'):null,
   ]);
   const users=await usersResponse.json();
-  const availability=((await availabilityResponse.json()) as AvailabilityRow[]).map(row=>({id:row.id,userId:row.user_id,date:row.date,startMinute:row.start_minute,endMinute:row.end_minute}));
+  const availability=((await availabilityResponse.json()) as AvailabilityRow[]).map(row=>({id:row.id,userId:row.user_id,date:row.date,startMinute:row.start_minute,endMinute:row.end_minute,recurrenceGroupId:row.recurrence_group_id,recurrenceType:row.recurrence_type}));
   const meetings=meetingsResponse?((await meetingsResponse.json()) as MeetingRow[]).map(row=>({id:row.id,organizerId:row.organizer_id,participantId:row.participant_id,date:row.date,startMinute:row.start_minute,duration:row.duration,title:row.title,meetingGroupId:row.meeting_group_id,meetingType:row.meeting_type,status:row.status})):[];
   return NextResponse.json({userId,users,availability,meetings});
 }
@@ -67,18 +66,37 @@ export async function POST(request:NextRequest) {
   if(body.action==='logout'){const response=NextResponse.json({ok:true});response.cookies.delete('agenda_demo_user');return response;}
   const userId=session(request);if(!userId)return NextResponse.json({error:'Sessão expirada.'},{status:401});
   if(body.action==='addAvailability'){
-    const dates=recurrenceDates(String(body.date),String(body.recurrence||'once')),start=Number(body.startMinute),end=Number(body.endMinute);
-    if(!dates.length||start<420||end>1080||end<=start)return NextResponse.json({error:'Use um intervalo entre 07:00 e 18:00.'},{status:400});
-    await supabase('agenda_availability?on_conflict=user_id,date,start_minute,end_minute',{method:'POST',headers:{Prefer:'resolution=ignore-duplicates,return=minimal'},body:JSON.stringify(dates.map(date=>({user_id:userId,date,start_minute:start,end_minute:end})))});
+    const recurrence=String(body.recurrence||'once'),dates=recurrenceDates(String(body.date),recurrence),start=Number(body.startMinute),end=Number(body.endMinute);
+    if(!['once','daily','weekly'].includes(recurrence)||!dates.length||start<420||end>1080||end<=start)return NextResponse.json({error:'Use um intervalo entre 07:00 e 18:00.'},{status:400});
+    try{
+      await supabase('rpc/agenda_add_availability',{method:'POST',body:JSON.stringify({p_user_id:userId,p_dates:dates,p_start_minute:start,p_end_minute:end,p_recurrence_type:recurrence,p_group_id:recurrence==='once'?null:crypto.randomUUID()})});
+    }catch(error){
+      if((error as Error).message.includes('Horário indisponível'))return NextResponse.json({error:'Esse horário já existe ou conflita com outro intervalo.'},{status:409});
+      throw error;
+    }
     return NextResponse.json({ok:true});
   }
   if(body.action==='deleteAvailability'){
-    await supabase(`agenda_availability?id=eq.${Number(body.id)}&user_id=eq.${userId}`,{method:'DELETE'});return NextResponse.json({ok:true});
+    const id=Number(body.id),scope=String(body.scope||'single');
+    const lookup=await supabase(`agenda_availability?id=eq.${id}&user_id=eq.${encodeURIComponent(userId)}&select=id,date,recurrence_group_id&limit=1`);
+    const [row]=await lookup.json() as Pick<AvailabilityRow,'id'|'date'|'recurrence_group_id'>[];
+    if(!row)return NextResponse.json({error:'Horário não encontrado.'},{status:404});
+    if(scope==='future'&&row.recurrence_group_id){
+      await supabase(`agenda_availability?user_id=eq.${encodeURIComponent(userId)}&recurrence_group_id=eq.${encodeURIComponent(row.recurrence_group_id)}&date=gte.${row.date}`,{method:'DELETE'});
+    }else{
+      await supabase(`agenda_availability?id=eq.${id}&user_id=eq.${encodeURIComponent(userId)}`,{method:'DELETE'});
+    }
+    return NextResponse.json({ok:true});
   }
   if(body.action==='updateAvailability'){
     const id=Number(body.id),date=String(body.date),start=Number(body.startMinute),end=Number(body.endMinute);
     if(!id||start<420||end>1080||end<=start)return NextResponse.json({error:'Use um intervalo entre 07:00 e 18:00.'},{status:400});
-    await supabase(`agenda_availability?id=eq.${id}&user_id=eq.${userId}`,{method:'PATCH',headers:{Prefer:'return=minimal'},body:JSON.stringify({date,start_minute:start,end_minute:end})});
+    try{
+      await supabase('rpc/agenda_update_availability',{method:'POST',body:JSON.stringify({p_id:id,p_user_id:userId,p_date:date,p_start_minute:start,p_end_minute:end})});
+    }catch(error){
+      if((error as Error).message.includes('Horário indisponível'))return NextResponse.json({error:'Esse horário já existe ou conflita com outro intervalo.'},{status:409});
+      throw error;
+    }
     return NextResponse.json({ok:true});
   }
   if(body.action==='book'){

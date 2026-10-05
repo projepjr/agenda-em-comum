@@ -1,4 +1,4 @@
-# Agenda em comum — handoff
+# Portal de Agendas Projep Jr. — handoff
 
 Aplicação mobile para cadastrar disponibilidades e cruzar horários entre hunters, closers e gerentes.
 
@@ -43,6 +43,9 @@ Aplicação mobile para cadastrar disponibilidades e cruzar horários entre hunt
 - A busca de participantes sempre inicia vazia e o seletor usa controles compactos com espacamento proprio.
 - Os icones de exclusao sao SVG pretos; nao reintroduzir emoji de lixeira.
 - O cruzamento de disponibilidade remove slots ocupados tanto pelo usuario atual quanto por qualquer pessoa selecionada.
+- Disponibilidades aceitam apenas `once`, `daily` e `weekly`; a opcao mensal foi removida.
+- Recorrencias compartilham `recurrence_group_id`. Ao excluir, o usuario escolhe entre apenas a ocorrencia aberta ou ela e todas as seguintes.
+- A criacao e a edicao usam RPCs transacionais com lock por usuario; intervalos adjacentes sao aceitos, mas qualquer sobreposicao e bloqueada no banco.
 - A criacao usa o RPC transacional `agenda_book_meeting`; nao substituir por insert direto, pois os locks por pessoa evitam agendamento simultaneo no mesmo intervalo.
 - Status disponiveis: `happened`, `no_show`, `interest_future`, `rescheduling` (rotulo Remarcando) e `discarded`.
 

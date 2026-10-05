@@ -110,6 +110,13 @@ button { cursor:pointer; }
 .sheet-actions.with-delete,.compact-footer.split { justify-content:space-between; }
 .save-button { min-height:38px; width:auto; padding:0 18px; border:0; border-radius:11px; background:var(--ink); color:#fff; font-size:12px; font-weight:820; }
 .delete-button { width:36px; height:36px; }
+.recurrence-delete-sheet { gap:13px; }
+.recurrence-delete-sheet .sheet-title h2 { font-size:19px; }
+.recurrence-delete-options { display:grid; gap:7px; }
+.recurrence-delete-options button { display:grid; gap:3px; width:100%; min-height:58px; padding:11px 13px; border:1px solid var(--line); border-radius:13px; background:#fff; text-align:left; }
+.recurrence-delete-options button:hover { border-color:#b9c8c0; background:var(--mint); }
+.recurrence-delete-options strong { font-size:12px; }
+.recurrence-delete-options small { color:var(--muted); font-size:10px; line-height:1.35; }
 .booking-sheet { padding-top:10px; }
 .type-picker { display:flex; gap:7px; }
 .type-picker button { min-width:58px; min-height:34px; padding:0 13px; border:1px solid var(--line); border-radius:99px; background:#fff; color:var(--muted); font-size:11px; font-weight:800; }

@@ -5,10 +5,10 @@ import './globals.css';
 const geist = Geist({ variable: '--font-geist', subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Agenda em comum',
+  title: 'Portal de Agendas Projep Jr.',
   description: 'Disponibilidades compartilhadas e reuniões sem conflito.',
   openGraph: {
-    title: 'Agenda em comum',
+    title: 'Portal de Agendas Projep Jr.',
     description: 'Cruze agendas e marque reuniões sem troca de mensagens.',
     images: ['/og.png'],
   },
