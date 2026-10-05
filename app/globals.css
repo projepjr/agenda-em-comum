@@ -120,6 +120,11 @@ button { cursor:pointer; }
 .more-button { width:38px!important; border:1px solid var(--line)!important; background:#fff!important; font-size:13px!important; letter-spacing:1px; }
 .status-menu { position:absolute; z-index:3; top:43px; right:0; display:grid; gap:3px; width:156px; padding:6px; border:1px solid var(--line); border-radius:13px; background:#fff; box-shadow:0 12px 35px rgb(16 42 34 / 15%); }
 .status-menu button { display:flex; align-items:center; gap:8px; width:100%; min-height:34px; padding:0 9px; border:0; border-radius:9px; text-align:left; font-size:10px; font-weight:750; }
+.status-menu button.status-happened { background:#dff3e6; color:#1f6b40; }
+.status-menu button.status-no_show { background:#eee5ff; color:#6d28d9; }
+.status-menu button.status-interest_future { background:#ffe889; color:#6b5100; }
+.status-menu button.status-rescheduling { background:#f39a32; color:#4f2800; }
+.status-menu button.status-discarded { background:#ef3f4d; color:#fff; }
 .status-menu i,.current-status i { width:7px; height:7px; border-radius:50%; background:currentColor; }
 .current-status { display:flex; align-items:center; gap:7px; width:max-content; padding:6px 9px; border-radius:99px; font-size:9px; font-weight:800; }
 input,select { width:100%; min-height:50px; padding:0 14px; border:1px solid var(--line); border-radius:14px; background:#fff; outline:none; }
