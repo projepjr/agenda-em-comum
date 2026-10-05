@@ -10,7 +10,7 @@
     "build": "vinext build",
     "start": "vinext start",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
-    "deploy": "npm run build && wrangler deploy --config dist/server/wrangler.json"
+    "deploy": "npm run build && wrangler deploy --config dist/server/wrangler.json --name agenda-em-comum-projep"
   },
   "dependencies": {
     "next": "16.2.6",

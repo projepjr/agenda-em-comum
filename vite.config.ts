@@ -4,14 +4,21 @@ import { defineConfig } from 'vite';
 
 // macOS Seatbelt blocks FSEvents, so Codex previews need polling for HMR.
 const isCodexSeatbeltSandbox = process.env.CODEX_SANDBOX === 'seatbelt';
+const hasSupabaseBindings = Boolean(
+  process.env.SUPABASE_URL && process.env.SUPABASE_PUBLISHABLE_KEY,
+);
 
 const localBindingConfig = {
   main: 'vinext/server/app-router-entry',
   compatibility_flags: ['nodejs_compat'],
-  vars: {
-    SUPABASE_URL: process.env.SUPABASE_URL ?? '',
-    SUPABASE_PUBLISHABLE_KEY: process.env.SUPABASE_PUBLISHABLE_KEY ?? '',
-  },
+  ...(hasSupabaseBindings
+    ? {
+        vars: {
+          SUPABASE_URL: process.env.SUPABASE_URL!,
+          SUPABASE_PUBLISHABLE_KEY: process.env.SUPABASE_PUBLISHABLE_KEY!,
+        },
+      }
+    : {}),
 };
 
 export default defineConfig(async () => {

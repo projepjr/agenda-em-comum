@@ -51,6 +51,7 @@ Aplicação mobile para cadastrar disponibilidades e cruzar horários entre hunt
 - Build: `npm run build`.
 - Deploy: `npm run deploy` depois de autenticar o Wrangler.
 - Configure no Cloudflare as variáveis `SUPABASE_URL` e `SUPABASE_PUBLISHABLE_KEY`.
+- O `vite.config.ts` só inclui essas variáveis no artefato quando elas existem no ambiente de build; isso evita sobrescrever bindings de produção com strings vazias. No Worker, mantenha ambas como secrets.
 
 ## Logins de demonstração
 
